@@ -1,0 +1,16 @@
+{
+  "name": "housing-tracker",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Full-stack Housing Tracker application",
+  "scripts": {
+    "install:frontend": "npm install --prefix frontend",
+    "install:backend": "npm install --prefix backend",
+    "build": "npm run build:frontend && npm run build:backend",
+    "dev:frontend": "npm --prefix frontend run dev",
+    "dev:backend": "npm --prefix backend run dev",
+    "build:frontend": "npm --prefix frontend run build",
+    "start:frontend": "npm --prefix frontend run start",
+    "start:backend": "npm --prefix backend run start"
+  }
+}
