@@ -18,21 +18,6 @@ Joana Camp, Senior, ODU
 
 Improve housing access through technology.
 
-## Stack
-
-- Frontend: Next.js, React, Tailwind CSS
-- Backend: Node.js, Express
-- Database: PostgreSQL
-
-## Features
-
-- Public homepage with housing openings and filters
-- Submission form for community updates
-- Admin panel for review, verification, and listing management
-- Research logs and CSV export
-- Background research job for listing refreshes
-- Email alerts by state preference
-- Optional SMS alerts using Twilio
 
 ## Research Context
 
