@@ -1,0 +1,633 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Housing Voucher Real-Time Tracker</title>
+  <style>
+    :root{
+      --bg:#f3efe7;
+      --panel:#fffdf8;
+      --panel-strong:#fff;
+      --ink:#1c2b33;
+      --muted:#586872;
+      --line:#d7cdc1;
+      --brand:#9f3a23;
+      --brand-deep:#6f2414;
+      --accent:#0f5f56;
+      --warn:#9c6a12;
+      --danger:#a12828;
+      --shadow:0 18px 40px rgba(40,26,19,.08);
+      --radius:24px;
+    }
+
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      font-family:"Aptos","Segoe UI",sans-serif;
+      color:var(--ink);
+      background:
+        radial-gradient(circle at top left, rgba(159,58,35,.12), transparent 28%),
+        radial-gradient(circle at top right, rgba(15,95,86,.1), transparent 24%),
+        linear-gradient(180deg, #fcfaf5 0%, #f5efe6 55%, #efe7dc 100%);
+    }
+
+    h1,h2,h3,p{margin:0}
+    a{color:inherit}
+    button,input,select{font:inherit}
+    button{cursor:pointer}
+
+    .page{
+      width:min(1240px, calc(100% - 24px));
+      margin:0 auto;
+      padding:20px 0 48px;
+    }
+
+    .hero,
+    .panel{
+      background:rgba(255,253,248,.88);
+      border:1px solid rgba(215,205,193,.9);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      backdrop-filter:blur(12px);
+    }
+
+    .hero{
+      overflow:hidden;
+      position:relative;
+      padding:32px;
+    }
+
+    .hero::after{
+      content:"";
+      position:absolute;
+      inset:auto -80px -80px auto;
+      width:220px;
+      height:220px;
+      background:radial-gradient(circle, rgba(159,58,35,.14), rgba(159,58,35,0));
+      pointer-events:none;
+    }
+
+    .eyebrow{
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      padding:8px 14px;
+      border-radius:999px;
+      background:rgba(15,95,86,.08);
+      color:var(--accent);
+      font-size:.88rem;
+      font-weight:700;
+      letter-spacing:.02em;
+      text-transform:uppercase;
+    }
+
+    .hero-grid{
+      display:grid;
+      grid-template-columns:minmax(0,1.4fr) minmax(320px,.9fr);
+      gap:24px;
+      margin-top:18px;
+    }
+
+    .hero h1{
+      font-family:"Georgia","Times New Roman",serif;
+      font-size:clamp(2.2rem, 5vw, 4.5rem);
+      line-height:.98;
+      letter-spacing:-.04em;
+      max-width:12ch;
+    }
+
+    .hero p{
+      margin-top:16px;
+      max-width:68ch;
+      color:var(--muted);
+      font-size:1.02rem;
+      line-height:1.7;
+    }
+
+    .hero-links{
+      display:flex;
+      flex-wrap:wrap;
+      gap:12px;
+      margin-top:22px;
+    }
+
+    .hero-links a,
+    .source-actions a{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      padding:13px 18px;
+      border-radius:999px;
+      text-decoration:none;
+      font-weight:700;
+      transition:transform .18s ease, box-shadow .18s ease, background .18s ease;
+    }
+
+    .hero-links a:hover,
+    .source-actions a:hover{transform:translateY(-1px)}
+
+    .primary-link{
+      background:var(--brand);
+      color:#fff;
+      box-shadow:0 12px 24px rgba(159,58,35,.18);
+    }
+
+    .secondary-link{
+      border:1px solid var(--line);
+      background:var(--panel-strong);
+      color:var(--ink);
+    }
+
+    .side-stack{
+      display:grid;
+      gap:14px;
+      align-content:start;
+    }
+
+    .summary-card{
+      padding:20px;
+      border-radius:22px;
+      background:linear-gradient(180deg, rgba(255,255,255,.94), rgba(249,244,237,.96));
+      border:1px solid rgba(215,205,193,.95);
+    }
+
+    .summary-card h2{
+      font-size:.82rem;
+      text-transform:uppercase;
+      letter-spacing:.08em;
+      color:var(--muted);
+    }
+
+    .summary-card strong{
+      display:block;
+      margin-top:10px;
+      font-size:2rem;
+      color:var(--brand-deep);
+    }
+
+    .summary-card span{
+      display:block;
+      margin-top:8px;
+      color:var(--muted);
+      line-height:1.55;
+    }
+
+    .panel{
+      margin-top:18px;
+      padding:24px;
+    }
+
+    .disclaimer-bar{
+      display:grid;
+      grid-template-columns:auto 1fr;
+      gap:14px;
+      align-items:start;
+      background:linear-gradient(90deg, rgba(156,106,18,.1), rgba(159,58,35,.06));
+    }
+
+    .disclaimer-icon{
+      width:42px;
+      height:42px;
+      border-radius:14px;
+      display:grid;
+      place-items:center;
+      background:#fff7e8;
+      color:var(--warn);
+      font-weight:800;
+    }
+
+    .section-head{
+      display:flex;
+      justify-content:space-between;
+      gap:16px;
+      align-items:end;
+      margin-bottom:20px;
+    }
+
+    .section-head h2{
+      font-family:"Georgia","Times New Roman",serif;
+      font-size:clamp(1.6rem, 3vw, 2.5rem);
+      letter-spacing:-.03em;
+    }
+
+    .section-head p{
+      max-width:66ch;
+      color:var(--muted);
+      line-height:1.65;
+    }
+
+    .stats{
+      display:grid;
+      grid-template-columns:repeat(4, minmax(0,1fr));
+      gap:14px;
+      margin-bottom:20px;
+    }
+
+    .stat{
+      padding:18px;
+      border-radius:20px;
+      background:linear-gradient(180deg, rgba(255,255,255,.96), rgba(247,241,233,.98));
+      border:1px solid rgba(215,205,193,.95);
+    }
+
+    .stat span{
+      display:block;
+      font-size:.82rem;
+      letter-spacing:.06em;
+      text-transform:uppercase;
+      color:var(--muted);
+    }
+
+    .stat strong{
+      display:block;
+      margin-top:8px;
+      font-size:1.85rem;
+      color:var(--brand-deep);
+    }
+
+    .toolbar{
+      display:grid;
+      grid-template-columns:minmax(0,1.2fr) repeat(3, minmax(180px,.45fr));
+      gap:12px;
+      margin-bottom:18px;
+    }
+
+    .toolbar label{
+      display:grid;
+      gap:8px;
+      color:var(--muted);
+      font-size:.93rem;
+      font-weight:700;
+    }
+
+    .toolbar input,
+    .toolbar select{
+      width:100%;
+      padding:13px 14px;
+      border-radius:16px;
+      border:1px solid var(--line);
+      background:#fff;
+      color:var(--ink);
+    }
+
+    .status-row{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      margin-bottom:18px;
+    }
+
+    .status-chip{
+      border:none;
+      padding:11px 14px;
+      border-radius:999px;
+      background:#f1e6db;
+      color:var(--ink);
+      font-weight:700;
+    }
+
+    .status-chip.active{
+      background:var(--brand);
+      color:#fff;
+    }
+
+    .results-note{
+      color:var(--muted);
+      margin-bottom:14px;
+    }
+
+    .cards{
+      display:grid;
+      grid-template-columns:repeat(2, minmax(0,1fr));
+      gap:16px;
+    }
+
+    .card{
+      display:grid;
+      gap:16px;
+      padding:22px;
+      border-radius:24px;
+      background:linear-gradient(180deg, rgba(255,255,255,.98), rgba(250,245,239,.98));
+      border:1px solid rgba(215,205,193,.95);
+      transition:transform .18s ease, box-shadow .18s ease;
+      animation:cardRise .35s ease both;
+    }
+
+    .card:hover{
+      transform:translateY(-2px);
+      box-shadow:0 22px 40px rgba(40,26,19,.09);
+    }
+
+    @keyframes cardRise{
+      from{opacity:0; transform:translateY(8px)}
+      to{opacity:1; transform:translateY(0)}
+    }
+
+    .card-top{
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      align-items:start;
+    }
+
+    .card-top h3{
+      font-size:1.25rem;
+      line-height:1.3;
+    }
+
+    .card-top p{
+      margin-top:8px;
+      color:var(--muted);
+      line-height:1.6;
+    }
+
+    .status-pill{
+      white-space:nowrap;
+      border-radius:999px;
+      padding:9px 12px;
+      font-weight:800;
+      font-size:.82rem;
+      text-transform:uppercase;
+      letter-spacing:.06em;
+    }
+
+    .status-open{background:rgba(15,95,86,.12); color:var(--accent)}
+    .status-limited{background:rgba(156,106,18,.12); color:var(--warn)}
+    .status-closed{background:rgba(161,40,40,.1); color:var(--danger)}
+
+    .meta-grid{
+      display:grid;
+      grid-template-columns:repeat(2, minmax(0,1fr));
+      gap:12px;
+    }
+
+    .meta{
+      padding:14px;
+      border-radius:18px;
+      background:#fff;
+      border:1px solid rgba(215,205,193,.9);
+    }
+
+    .meta span{
+      display:block;
+      color:var(--muted);
+      font-size:.82rem;
+      text-transform:uppercase;
+      letter-spacing:.06em;
+    }
+
+    .meta strong{
+      display:block;
+      margin-top:6px;
+      line-height:1.45;
+    }
+
+    .source-box{
+      padding:16px;
+      border-radius:18px;
+      background:#fffaf3;
+      border:1px dashed #d8c29e;
+    }
+
+    .source-box p{
+      color:var(--muted);
+      line-height:1.6;
+    }
+
+    .source-actions{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      margin-top:12px;
+    }
+
+    .empty-state{
+      padding:26px;
+      border-radius:22px;
+      border:1px dashed var(--line);
+      background:#fff;
+      color:var(--muted);
+      line-height:1.7;
+    }
+
+    .research-grid{
+      display:grid;
+      grid-template-columns:1.2fr .8fr;
+      gap:16px;
+    }
+
+    .research-box{
+      padding:22px;
+      border-radius:22px;
+      background:linear-gradient(180deg, rgba(255,255,255,.98), rgba(248,243,236,.98));
+      border:1px solid rgba(215,205,193,.95);
+    }
+
+    .research-box h3{
+      margin-bottom:12px;
+      font-size:1.1rem;
+    }
+
+    .research-box p,
+    .research-box li{
+      color:var(--muted);
+      line-height:1.7;
+    }
+
+    .research-box ul{
+      margin:0;
+      padding-left:18px;
+    }
+
+    footer{
+      margin-top:18px;
+      padding:20px 4px 0;
+      color:var(--muted);
+      font-size:.95rem;
+      line-height:1.7;
+    }
+
+    footer a{
+      color:var(--brand-deep);
+      font-weight:700;
+    }
+
+    @media (max-width:1024px){
+      .hero-grid,
+      .research-grid,
+      .toolbar,
+      .cards,
+      .stats{grid-template-columns:1fr}
+    }
+
+    @media (max-width:720px){
+      .page{width:min(100% - 14px,100%); padding-top:10px}
+      .hero,.panel{padding:18px}
+      .card{padding:18px}
+      .card-top,.section-head{display:block}
+      .status-pill{display:inline-flex; margin-top:12px}
+      .meta-grid{grid-template-columns:1fr}
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header class="hero">
+      <div class="eyebrow">Living Lab Research Initiative</div>
+      <div class="hero-grid">
+        <div>
+          <h1>Housing Voucher Real-Time Tracker</h1>
+          <p>
+            A research-based web application for monitoring Housing Choice Voucher, Project-Based Voucher, and related
+            program openings across the United States. This prototype supports community access, transparency, and
+            official-source verification for residents, advocates, and partner organizations.
+          </p>
+          <p>
+            This tool is part of ongoing Living Lab research in collaboration with Old Dominion University (ODU),
+            Central Virginia Resource Corporation (CVRC), and Resources for Independent Living (RIL). It is not a
+            government system and should be used as a starting point for verification, not a substitute for the housing
+            authority's current rules.
+          </p>
+          <div class="hero-links">
+            <a class="primary-link" href="#tracker">Browse tracked openings</a>
+            <a class="secondary-link" href="https://www.odu.edu" target="_blank" rel="noreferrer">Visit Old Dominion University</a>
+          </div>
+        </div>
+
+        <div class="side-stack">
+          <article class="summary-card">
+            <h2>Research Lead</h2>
+            <strong>Joana Camp</strong>
+            <span>Senior at Old Dominion University and lead researcher for this housing-access focused prototype.</span>
+          </article>
+          <article class="summary-card">
+            <h2>Data Standard</h2>
+            <strong>Official Links Only</strong>
+            <span>Each tracked record must point users back to an official housing authority or HUD source for confirmation.</span>
+          </article>
+          <article class="summary-card">
+            <h2>Community Intent</h2>
+            <strong>Access + Transparency</strong>
+            <span>Designed to improve discoverability of waitlist openings and reduce confusion around eligibility, dates, and status changes.</span>
+          </article>
+        </div>
+      </div>
+    </header>
+
+    <section class="panel disclaimer-bar" aria-label="Important disclaimer">
+      <div class="disclaimer-icon">!</div>
+      <div>
+        <strong>Verification reminder:</strong>
+        <span id="verificationMessage">
+          Openings, deadlines, preferences, and application procedures can change quickly. Always verify the current status
+          on the official housing authority page before applying, traveling, or sharing information with residents.
+        </span>
+      </div>
+    </section>
+
+    <main>
+      <section class="panel" id="tracker">
+        <div class="section-head">
+          <div>
+            <h2>Tracked Programs</h2>
+            <p>
+              The dashboard below highlights manually verified records with direct links to official sources. Filters are
+              intended to help researchers and community partners triage likely opportunities more quickly.
+            </p>
+          </div>
+        </div>
+
+        <div class="stats" id="stats"></div>
+
+        <div class="toolbar">
+          <label>
+            Search city, state, authority, or program
+            <input id="searchInput" type="search" placeholder="Example: Florida, PBV, Philadelphia">
+          </label>
+          <label>
+            Status
+            <select id="statusSelect">
+              <option value="all">All statuses</option>
+              <option value="open">Open</option>
+              <option value="limited">Limited</option>
+              <option value="closed">Closed</option>
+            </select>
+          </label>
+          <label>
+            Program type
+            <select id="programSelect">
+              <option value="all">All program types</option>
+            </select>
+          </label>
+          <label>
+            State
+            <select id="stateSelect">
+              <option value="all">All states</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="status-row" id="statusChips"></div>
+        <p class="results-note" id="resultsNote"></p>
+        <div class="cards" id="cards"></div>
+      </section>
+
+      <section class="panel">
+        <div class="section-head">
+          <div>
+            <h2>Research Context</h2>
+            <p>
+              The tracker is designed as a community-impact research tool. It centers discoverability, source transparency,
+              and practical verification habits that can support underserved communities navigating fragmented housing systems.
+            </p>
+          </div>
+        </div>
+
+        <div class="research-grid">
+          <article class="research-box">
+            <h3>Project Background</h3>
+            <p>
+              This work sits within the Living Lab initiative and is being developed in collaboration with ODU, CVRC, and
+              RIL. Old Dominion University is a public research university focused on solving real-world problems through
+              innovation, research, and community partnerships.
+            </p>
+            <p>
+              The application’s purpose is to track real-time housing voucher program openings across the United States,
+              improve access to housing resources, and centralize waitlist information in a transparent, citation-first format.
+            </p>
+          </article>
+
+          <article class="research-box">
+            <h3>Methodology Notes</h3>
+            <ul>
+              <li>Each listing includes a direct official-source link and a separate application link when available.</li>
+              <li>Every card displays a last-verified date to make staleness visible.</li>
+              <li>Status labels distinguish between fully open, limited/preference-only, and closed programs.</li>
+              <li>Users are encouraged to confirm details directly with the housing authority before taking action.</li>
+            </ul>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <p>
+        Partners and references:
+        <a href="https://www.odu.edu" target="_blank" rel="noreferrer">Old Dominion University</a>,
+        <a href="https://cvrc-va.org/" target="_blank" rel="noreferrer">Central Virginia Resource Corporation</a>,
+        <a href="https://ril-va.org/" target="_blank" rel="noreferrer">Resources for Independent Living</a>,
+        and
+        <a href="https://www.hud.gov" target="_blank" rel="noreferrer">HUD</a>.
+      </p>
+      <p>
+        Disclaimer: This is a research and community-impact tool, not a government application portal. Applicants should
+        always confirm deadlines, preferences, eligibility, and required documents on the official agency website.
+      </p>
+    </footer>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

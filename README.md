@@ -2,7 +2,7 @@
 
 ## Project Description
 
-`housing-tracker-research` is a full-stack research web application focused on tracking housing openings, waitlists, and related updates in a centralized, accessible format. The platform is designed to support research, community outreach, and practical access to housing information through structured listings, submission workflows, verification tools, and research logging.
+Housing Tracker is a full-stack research web application focused on tracking housing openings, waitlists, and related updates in a centralized, accessible format. The platform is designed to support research, community outreach, and practical access to housing information through structured listings, submission workflows, verification tools, and research logging.
 
 ## Research Affiliation
 
@@ -18,13 +18,13 @@ Joana Camp, Senior, ODU
 
 Improve housing access through technology.
 
+## Setup Instructions
 
-## Research Context
-
-This project is part of a Living Lab research initiative led by Joana Camp in collaboration with ODU, CVRC, and RIL. The application is intended to improve transparency and discoverability around housing opportunities while supporting research-informed approaches to access and verification.
-
-
-
-## Important Note
-
-This tool is for informational and research purposes. Users should verify all housing information directly with the relevant official housing authority before acting on it.
+1. Install frontend dependencies with `npm install --prefix frontend`.
+2. Install backend dependencies with `npm install --prefix backend`.
+3. Create a PostgreSQL database for the project.
+4. Configure environment variables for the frontend and backend.
+5. Run `db/schema.sql` to create the database tables.
+6. Optionally run `db/seed.sql` to add starter data.
+7. Start the backend with `npm run dev:backend`.
+8. Start the frontend with `npm run dev:frontend`.
