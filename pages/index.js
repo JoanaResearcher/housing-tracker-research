@@ -1,79 +1,65 @@
-import { useState } from "react";
+import { useEffect, useState } from "react"
+import { supabase } from "../lib/supabase"
 
 export default function Home() {
-  const [filter, setFilter] = useState("all");
+  const [listings, setListings] = useState([])
+  const [loading, setLoading] = useState(true)
 
-  const listings = [
-    {
-      city: "Richmond",
-      state: "VA",
-      authority: "Richmond Redevelopment & Housing Authority",
-      status: "open",
-      url: "#"
-    },
-    {
-      city: "Norfolk",
-      state: "VA",
-      authority: "Norfolk Redevelopment & Housing Authority",
-      status: "waitlist",
-      url: "#"
-    },
-    {
-      city: "Virginia Beach",
-      state: "VA",
-      authority: "Virginia Beach Housing & Neighborhood Preservation",
-      status: "closed",
-      url: "#"
+  useEffect(() => {
+    fetchListings()
+  }, [])
+
+  async function fetchListings() {
+    setLoading(true)
+
+    const { data, error } = await supabase
+      .from("listings")
+      .select("*")
+
+    if (error) {
+      console.log("Error loading data:", error)
+    } else {
+      setListings(data)
     }
-  ];
 
-  const filtered = listings.filter((item) => {
-    if (filter === "all") return true;
-    return item.status === filter;
-  });
+    setLoading(false)
+  }
 
   return (
-    <div style={{ padding: 40, fontFamily: "Arial" }}>
+    <div style={{ padding: "20px", fontFamily: "Arial" }}>
       <h1>Housing Voucher Tracker</h1>
-      <p>ODU Living Lab Research Project</p>
 
-      <hr />
+      {loading && <p>Loading listings...</p>}
 
-      {/* FILTERS */}
-      <div style={{ marginBottom: 20 }}>
-        <button onClick={() => setFilter("all")}>All</button>
-        <button onClick={() => setFilter("open")}>Open</button>
-        <button onClick={() => setFilter("waitlist")}>Waitlist</button>
-        <button onClick={() => setFilter("closed")}>Closed</button>
+      {!loading && listings.length === 0 && (
+        <p>No listings found.</p>
+      )}
+
+      <div style={{ marginTop: "20px" }}>
+        {listings.map((item) => (
+          <div
+            key={item.id}
+            style={{
+              border: "1px solid #ccc",
+              padding: "10px",
+              marginBottom: "10px",
+              borderRadius: "8px"
+            }}
+          >
+            <h3>
+              {item.city}, {item.state}
+            </h3>
+
+            <p><b>Authority:</b> {item.authority}</p>
+            <p><b>Status:</b> {item.status}</p>
+            <p>
+              <a href={item.url} target="_blank">
+                More Info
+              </a>
+            </p>
+          </div>
+        ))}
       </div>
-
-      {/* LISTINGS */}
-      {filtered.map((item, index) => (
-        <div
-          key={index}
-          style={{
-            border: "1px solid #ccc",
-            padding: 15,
-            marginBottom: 10,
-            borderRadius: 8
-          }}
-        >
-          <h3>
-            {item.city}, {item.state}
-          </h3>
-
-          <p>{item.authority}</p>
-
-          <p>
-            Status:{" "}
-            <strong>
-              {item.status.toUpperCase()}
-            </strong>
-          </p>
-
-          <a href={item.url}>View Source</a>
-        </div>
-      ))}
     </div>
-  );
+  )
 }
