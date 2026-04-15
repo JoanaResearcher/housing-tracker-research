@@ -5,10 +5,10 @@ export default function Home() {
   const [listings, setListings] = useState([])
 
   useEffect(() => {
-    load()
+    loadData()
   }, [])
 
-  async function load() {
+  async function loadData() {
     const { data } = await supabase
       .from("listings")
       .select("*")
